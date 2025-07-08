@@ -103,77 +103,54 @@ If needed, you can further use the `web_scraper.py` file to scrape the web page 
 
 # Scratchpad
 
-## 當前任務：批量測試各科目PDF轉Markdown功能
+## 當前任務：移除LLM功能並簡化PDF轉Markdown程式
 
 ### 任務說明
-- 測試多個不同科目的PDF檔案轉換功能
-- 驗證各科目（國文、數學、英文、歷史、地理、公民、自然）的轉換效果
-- 評估公式、表格、圖片等特殊內容的處理品質
+- 移除 convert_pdf_to_md.py 中的所有 LLM 相關功能
+- 簡化程式碼結構，提高執行效率
+- 保持核心的PDF轉Markdown功能
 
 ### 計劃步驟
-[X] 1. 修改 convert_pdf_to_md.py 支援批量處理
-[X] 2. 設計自動尋找各科目PDF檔案的邏輯
-[X] 3. 執行批量轉換測試
-[X] 4. 檢查各科目轉換結果
-[X] 5. 分析特殊內容處理效果
-[X] 6. 記錄測試結果與發現
+[X] 1. 移除 setup_llm 函數
+[X] 2. 移除 LLM 相關的 import
+[X] 3. 簡化 convert_pdf_to_markdown 函數參數
+[X] 4. 移除 LLM 校正邏輯
+[X] 5. 更新 process_subject 函數
+[X] 6. 更新 batch_convert_all_pdfs 函數
 
 ### 進度記錄
 - 開始時間：當前
 - 狀態：已完成
-- 測試範圍：111A年級7年級翰林版本，7個科目各2個檔案
-- 總計：14個PDF檔案全部成功轉換
+- 修改範圍：convert_pdf_to_md.py 檔案
 
-### 測試結果總結
-✅ **成功轉換：14個檔案**
-❌ **轉換失敗：0個檔案**
+### 修改內容
+1. **移除的組件**：
+   - `setup_llm()` 函數
+   - `LLM` import
+   - `llm` 參數和相關邏輯
+   - `use_llm_correction` 參數
+   - LLM 校正相關的程式碼區塊
 
-### 各科目測試結果
-1. **國文 (Chinese)**: 2個檔案 - 成功識別表格和文字內容
-2. **數學 (Math)**: 2個檔案 - 成功識別數學公式 (isolate_formulas) 和圖表
-3. **英文 (English)**: 2個檔案 - 成功識別英文文字和圖片
-4. **歷史 (History)**: 2個檔案 - 成功識別表格、圖片和文字
-5. **地理 (Geography)**: 2個檔案 - 成功識別地圖、表格和圖片
-6. **公民 (Civics_and_Society)**: 2個檔案 - 成功識別表格和文字
-7. **自然 (Physics_and_Chemistry)**: 2個檔案 - 成功識別科學圖表、表格和文字
+2. **簡化的函數**：
+   - `convert_pdf_to_markdown()`: 移除 LLM 參數和校正邏輯
+   - `process_subject()`: 移除 LLM 相關參數
+   - `batch_convert_all_pdfs()`: 移除 LLM 相關參數
 
-### 技術發現
-- **內容識別能力**：pdf-craft 能識別多種內容類型
-  - tables, table_captions (表格和表格標題)
-  - plain texts (純文字)
-  - titles (標題)
-  - figures (圖片)
-  - isolate_formulas (獨立公式)
-  - abandons (被忽略的內容)
+3. **保留的核心功能**：
+   - PDF 解析和轉換
+   - 數學公式處理
+   - 多語言 OCR
+   - 表格格式轉換
+   - 圖片提取
 
-- **處理效能**：每個檔案平均處理時間約8-11秒
-- **圖片處理**：自動提取並保存為PNG格式
-- **表格處理**：自動轉換為Markdown表格格式
-- **公式處理**：數學公式被正確識別為 isolate_formulas
+### 程式碼優化效果
+- **執行效率**：移除 LLM 相關處理，提高轉換速度
+- **記憶體使用**：減少不必要的 LLM 模型載入
+- **依賴簡化**：不再需要 LLM API 金鑰和網路連線
+- **程式碼清晰度**：移除複雜的 LLM 配置邏輯
 
-### 輸出結構
-```
-output_docs/test_batch/
-├── Chinese/
-├── Math/
-├── English/
-├── History/
-├── Geography/
-├── Civics_and_Society/
-└── Physics_and_Chemistry/
-```
-
-每個科目目錄包含對應的Markdown檔案和images子目錄。
-
-### 品質評估
-- **文字識別**：準確度很高，能正確識別中英文混合內容
-- **表格處理**：自動轉換為Markdown格式，結構清晰
-- **圖片處理**：成功提取並保存，在Markdown中正確引用
-- **公式識別**：數學公式被正確標記，便於後續處理
-- **版面保持**：整體版面結構保持良好
-
-### 後續改進建議
-1. 可考慮針對不同科目使用專門的後處理規則
-2. 數學公式可進一步轉換為LaTeX格式
-3. 可加入內容分類標籤，便於後續分析
-4. 考慮加入OCR品質評估機制
+### 後續建議
+1. 程式現在更專注於核心的 PDF 轉換功能
+2. 可考慮加入其他後處理選項（如自定義格式）
+3. 保持數學公式處理功能的完整性
+4. 考慮加入批次處理的進度顯示
