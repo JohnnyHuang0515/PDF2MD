@@ -1,0 +1,8 @@
+created_at: '2025-07-08 08:19:21'
+payload:
+  completed_ranges: []
+  level: single
+  max_data_tokens: 4096
+  phase: completed
+updated_at: '2025-07-08 08:19:21'
+version: 1.0.0

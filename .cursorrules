@@ -1,0 +1,179 @@
+# Instructions
+
+During you interaction with the user, if you find anything reusable in this project (e.g. version of a library, model name), especially about a fix to a mistake you made or a correction you received, you should take note in the `Lessons` section in the `.cursorrules` file so you will not make the same mistake again.
+
+You should also use the `.cursorrules` file as a scratchpad to organize your thoughts. Especially when you receive a new task, you should first review the content of the scratchpad, clear old different task if necessary, first explain the task, and plan the steps you need to take to complete the task. You can use todo markers to indicate the progress, e.g.
+[X] Task 1
+[ ] Task 2
+
+Also update the progress of the task in the Scratchpad when you finish a subtask.
+Especially when you finished a milestone, it will help to improve your depth of task accomplishment to use the scratchpad to reflect and plan.
+The goal is to help you maintain a big picture as well as the progress of the task. Always refer to the Scratchpad when you plan the next step.
+
+# Tools
+
+Note all the tools are in python. So in the case you need to do batch processing, you can always consult the python files and write your own script.
+
+## Screenshot Verification
+The screenshot verification workflow allows you to capture screenshots of web pages and verify their appearance using LLMs. The following tools are available:
+
+1. Screenshot Capture:
+```bash
+python tools/screenshot_utils.py URL [--output OUTPUT] [--width WIDTH] [--height HEIGHT]
+```
+
+2. LLM Verification with Images:
+```bash
+python tools/llm_api.py --prompt "Your verification question" --provider {openai|anthropic} --image path/to/screenshot.png
+```
+
+Example workflow:
+```python
+from screenshot_utils import take_screenshot_sync
+from llm_api import query_llm
+
+# Take a screenshot
+screenshot_path = take_screenshot_sync('https://example.com', 'screenshot.png')
+
+# Verify with LLM
+response = query_llm(
+    "What is the background color and title of this webpage?",
+    provider="openai",  # or "anthropic"
+    image_path=screenshot_path
+)
+print(response)
+```
+
+## LLM
+
+You always have an LLM at your side to help you with the task. For simple tasks, you could invoke the LLM by running the following command:
+```
+python ./tools/llm_api.py --prompt "What is the capital of France?" --provider "anthropic"
+```
+
+The LLM API supports multiple providers:
+- OpenAI (default, model: gpt-4o)
+- Azure OpenAI (model: configured via AZURE_OPENAI_MODEL_DEPLOYMENT in .env file, defaults to gpt-4o-ms)
+- DeepSeek (model: deepseek-chat)
+- Anthropic (model: claude-3-sonnet-20240229)
+- Gemini (model: gemini-pro)
+- Local LLM (model: Qwen/Qwen2.5-32B-Instruct-AWQ)
+
+But usually it's a better idea to check the content of the file and use the APIs in the `tools/llm_api.py` file to invoke the LLM if needed.
+
+## Web browser
+
+You could use the `./tools/web_scraper.py` file to scrape the web.
+```
+python ./tools/web_scraper.py --max-concurrent 3 URL1 URL2 URL3
+```
+This will output the content of the web pages.
+
+## Search engine
+
+You could use the `tools/search_engine.py` file to search the web.
+```
+python ./tools/search_engine.py "your search keywords"
+```
+This will output the search results in the following format:
+```
+URL: https://example.com
+Title: This is the title of the search result
+Snippet: This is a snippet of the search result
+```
+If needed, you can further use the `web_scraper.py` file to scrape the web page content.
+
+# Lessons
+
+## User Specified Lessons
+
+- You have a python venv in ./venv. Use it.
+- Include info useful for debugging in the program output.
+- Read the file before you try to edit it.
+- Due to Cursor's limit, when you use `git` and `gh` and need to submit a multiline commit message, first write the message in a file, and then use `git commit -F <filename>` or similar command to commit. And then remove the file. Include "[Cursor] " in the commit message and PR title.
+
+## Cursor learned
+
+- For search results, ensure proper handling of different character encodings (UTF-8) for international queries
+- Add debug information to stderr while keeping the main output clean in stdout for better pipeline integration
+- When using seaborn styles in matplotlib, use 'seaborn-v0_8' instead of 'seaborn' as the style name due to recent seaborn version changes
+- Use 'gpt-4o' as the model name for OpenAI's GPT-4 with vision capabilities
+- PowerShell 不支援 `&&` 語法，需要使用分號 `;` 或分別執行命令
+- pdf-craft 能成功識別多種內容類型：tables, table_captions, plain texts, titles, figures, isolate_formulas 等
+
+# Scratchpad
+
+## 當前任務：批量測試各科目PDF轉Markdown功能
+
+### 任務說明
+- 測試多個不同科目的PDF檔案轉換功能
+- 驗證各科目（國文、數學、英文、歷史、地理、公民、自然）的轉換效果
+- 評估公式、表格、圖片等特殊內容的處理品質
+
+### 計劃步驟
+[X] 1. 修改 convert_pdf_to_md.py 支援批量處理
+[X] 2. 設計自動尋找各科目PDF檔案的邏輯
+[X] 3. 執行批量轉換測試
+[X] 4. 檢查各科目轉換結果
+[X] 5. 分析特殊內容處理效果
+[X] 6. 記錄測試結果與發現
+
+### 進度記錄
+- 開始時間：當前
+- 狀態：已完成
+- 測試範圍：111A年級7年級翰林版本，7個科目各2個檔案
+- 總計：14個PDF檔案全部成功轉換
+
+### 測試結果總結
+✅ **成功轉換：14個檔案**
+❌ **轉換失敗：0個檔案**
+
+### 各科目測試結果
+1. **國文 (Chinese)**: 2個檔案 - 成功識別表格和文字內容
+2. **數學 (Math)**: 2個檔案 - 成功識別數學公式 (isolate_formulas) 和圖表
+3. **英文 (English)**: 2個檔案 - 成功識別英文文字和圖片
+4. **歷史 (History)**: 2個檔案 - 成功識別表格、圖片和文字
+5. **地理 (Geography)**: 2個檔案 - 成功識別地圖、表格和圖片
+6. **公民 (Civics_and_Society)**: 2個檔案 - 成功識別表格和文字
+7. **自然 (Physics_and_Chemistry)**: 2個檔案 - 成功識別科學圖表、表格和文字
+
+### 技術發現
+- **內容識別能力**：pdf-craft 能識別多種內容類型
+  - tables, table_captions (表格和表格標題)
+  - plain texts (純文字)
+  - titles (標題)
+  - figures (圖片)
+  - isolate_formulas (獨立公式)
+  - abandons (被忽略的內容)
+
+- **處理效能**：每個檔案平均處理時間約8-11秒
+- **圖片處理**：自動提取並保存為PNG格式
+- **表格處理**：自動轉換為Markdown表格格式
+- **公式處理**：數學公式被正確識別為 isolate_formulas
+
+### 輸出結構
+```
+output_docs/test_batch/
+├── Chinese/
+├── Math/
+├── English/
+├── History/
+├── Geography/
+├── Civics_and_Society/
+└── Physics_and_Chemistry/
+```
+
+每個科目目錄包含對應的Markdown檔案和images子目錄。
+
+### 品質評估
+- **文字識別**：準確度很高，能正確識別中英文混合內容
+- **表格處理**：自動轉換為Markdown格式，結構清晰
+- **圖片處理**：成功提取並保存，在Markdown中正確引用
+- **公式識別**：數學公式被正確標記，便於後續處理
+- **版面保持**：整體版面結構保持良好
+
+### 後續改進建議
+1. 可考慮針對不同科目使用專門的後處理規則
+2. 數學公式可進一步轉換為LaTeX格式
+3. 可加入內容分類標籤，便於後續分析
+4. 考慮加入OCR品質評估機制
