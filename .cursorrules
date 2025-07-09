@@ -103,112 +103,66 @@ If needed, you can further use the `web_scraper.py` file to scrape the web page 
 
 # Scratchpad
 
-<<<<<<< HEAD
-## 當前任務：確認 pdf_craft 使用方式
+## 當前任務：解決Git合併衝突並保留簡化版本
 
 ### 任務說明
-- 確認 `convert_pdf_to_md.py` 是否已按照 pdf_craft 官方方式修改
-- 驗證 GPU 支援是否正確實現
-- 檢查程式碼是否符合最佳實踐
+- 解決 convert_pdf_to_md.py 中的 Git 合併衝突
+- 保留 c5fd878 版本（簡化版本，移除 LLM 功能）
+- 確保程式碼結構清晰且功能完整
 
 ### 計劃步驟
-[X] 1. 檢查程式碼是否使用 pdf_craft 官方 API
-[X] 2. 確認 GPU 檢測和設備選擇邏輯
-[X] 3. 驗證 MarkDownWriter 使用方式
-[X] 4. 更新進度記錄
-
-### 修改內容確認
-- **pdf_craft API**：✅ 已使用 `create_pdf_page_extractor` 和 `MarkDownWriter`
-- **GPU檢測**：✅ 已實現自動檢測 CUDA GPU 功能
-- **設備選擇**：✅ 優先使用 GPU，無GPU時自動回退到CPU
-- **MarkDownWriter**：✅ 正確使用 `with MarkDownWriter()` 語法
-- **錯誤處理**：✅ 已處理表格模組缺失等問題
-
-### 程式碼結構
-```python
-# GPU檢測
-device = detect_gpu()  # 自動檢測 "cuda" 或 "cpu"
-
-# 創建提取器
-extractor = create_pdf_page_extractor(
-    device=device,
-    model_dir_path=str(model_cache_path),
-    extract_formula=True,
-    extract_table_format=ExtractedTableFormat.DISABLE,
-)
-
-# 使用 MarkDownWriter
-with MarkDownWriter(output_md_path, image_output_dir, encoding) as md:
-    for block in extractor.extract(str(pdf_path)):
-        md.write(block)
-```
-
-### 符合官方範例
-✅ **完全符合** pdf_craft 官方使用方式：
-- 使用 `create_pdf_page_extractor()` 創建提取器
-- 使用 `MarkDownWriter()` 寫入 Markdown
-- 支援 GPU 加速 (`device="cuda"`)
-- 自動處理圖片、表格、公式
+[X] 1. 檢查檔案中的合併衝突標記
+[X] 2. 選擇保留 c5fd878 版本（簡化版本）
+[X] 3. 移除所有合併衝突標記
+[X] 4. 驗證程式碼結構和功能
+[X] 5. 更新進度記錄
 
 ### 進度記錄
 - 開始時間：當前
-- 狀態：✅ 已完成 pdf_craft 官方方式修改
-- 確認：程式碼完全符合官方 API 使用方式
-- GPU支援：✅ 已正確實現自動檢測和使用
+- 狀態：✅ 已完成合併衝突解決
+- 修改範圍：convert_pdf_to_md.py 檔案
+
+### 解決的衝突
+1. **Import 語句**：
+   - 保留：`from pdf_craft import create_pdf_page_extractor, MarkDownWriter, ExtractedTableFormat, analyse, CorrectionMode`
+   - 移除：LLM 相關的 import
+
+2. **函數結構**：
+   - 保留：簡化的 `convert_pdf_to_markdown()` 函數
+   - 移除：複雜的多進程處理函數
+   - 保留：`batch_convert_all_pdfs()` 單線程版本
+
+3. **主要功能**：
+   - 保留：PDF 轉換核心功能
+   - 保留：數學公式處理
+   - 保留：多語言 OCR
+   - 移除：LLM 校正功能
+   - 移除：複雜的進度追蹤和並行處理
+
+### 最終程式碼特點
+- **簡潔性**：移除複雜的 LLM 和多進程邏輯
+- **可讀性**：程式碼結構清晰，易於理解和維護
+- **功能性**：保留核心的 PDF 轉 Markdown 功能
+- **穩定性**：減少依賴，提高執行穩定性
+
+### 程式碼結構
+```python
+# 主要函數
+def convert_pdf_to_markdown()  # 單個PDF轉換
+def batch_convert_all_pdfs()   # 批次轉換所有PDF
+def validate_pdf_file()        # PDF檔案驗證
+def process_math_formulas()    # 數學公式處理
+
+# 設定
+device = "cuda"  # 或 "cpu"
+extract_table_format = ExtractedTableFormat.MARKDOWN
+```
+
+### 使用方式
+```bash
+python convert_pdf_to_md.py
+```
 
 ## 歷史任務記錄
 
 ### 批量測試各科目PDF轉Markdown功能
-=======
-## 當前任務：移除LLM功能並簡化PDF轉Markdown程式
->>>>>>> c5fd878ef717c3e7aee6fd715ea2cfcec3472816
-
-### 任務說明
-- 移除 convert_pdf_to_md.py 中的所有 LLM 相關功能
-- 簡化程式碼結構，提高執行效率
-- 保持核心的PDF轉Markdown功能
-
-### 計劃步驟
-[X] 1. 移除 setup_llm 函數
-[X] 2. 移除 LLM 相關的 import
-[X] 3. 簡化 convert_pdf_to_markdown 函數參數
-[X] 4. 移除 LLM 校正邏輯
-[X] 5. 更新 process_subject 函數
-[X] 6. 更新 batch_convert_all_pdfs 函數
-
-### 進度記錄
-- 開始時間：當前
-- 狀態：已完成
-- 修改範圍：convert_pdf_to_md.py 檔案
-
-### 修改內容
-1. **移除的組件**：
-   - `setup_llm()` 函數
-   - `LLM` import
-   - `llm` 參數和相關邏輯
-   - `use_llm_correction` 參數
-   - LLM 校正相關的程式碼區塊
-
-2. **簡化的函數**：
-   - `convert_pdf_to_markdown()`: 移除 LLM 參數和校正邏輯
-   - `process_subject()`: 移除 LLM 相關參數
-   - `batch_convert_all_pdfs()`: 移除 LLM 相關參數
-
-3. **保留的核心功能**：
-   - PDF 解析和轉換
-   - 數學公式處理
-   - 多語言 OCR
-   - 表格格式轉換
-   - 圖片提取
-
-### 程式碼優化效果
-- **執行效率**：移除 LLM 相關處理，提高轉換速度
-- **記憶體使用**：減少不必要的 LLM 模型載入
-- **依賴簡化**：不再需要 LLM API 金鑰和網路連線
-- **程式碼清晰度**：移除複雜的 LLM 配置邏輯
-
-### 後續建議
-1. 程式現在更專注於核心的 PDF 轉換功能
-2. 可考慮加入其他後處理選項（如自定義格式）
-3. 保持數學公式處理功能的完整性
-4. 考慮加入批次處理的進度顯示
