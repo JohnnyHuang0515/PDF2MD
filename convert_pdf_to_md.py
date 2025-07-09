@@ -14,34 +14,9 @@ import gc
 import traceback
 import logging
 
-def process_math_formulas(text):
-    """處理數學公式，轉換為LaTeX格式"""
-    math_patterns = [
-        (r'(\d+)/(\d+)', r'\\frac{\1}{\2}'),
-        (r'√(\w+)', r'\\sqrt{\1}'),
-        (r'(\w+)\^(\w+)', r'\1^{\2}'),
-        (r'α', r'\\alpha'),
-        (r'β', r'\\beta'),
-        (r'γ', r'\\gamma'),
-        (r'π', r'\\pi'),
-        (r'θ', r'\\theta'),
-        (r'±', r'\\pm'),
-        (r'≤', r'\\leq'),
-        (r'≥', r'\\geq'),
-        (r'≠', r'\\neq'),
-        (r'∞', r'\\infty'),
-        (r'\|([^|]+)\|', r'|\1|'),
-        (r'－', r'-'),
-        (r'—', r'-'),
-    ]
-    processed_text = text
-    for pattern, replacement in math_patterns:
-        processed_text = re.sub(pattern, replacement, processed_text)
-    return processed_text
-
 def convert_pdf_to_markdown(pdf_path, output_dir, image_output_dir, extractor, encoding="utf-8", 
-                          enable_math_processing=True, enable_multilingual_ocr=True):
-    """轉換單個PDF檔案為Markdown，支援多重OCR和數學公式處理"""
+                          enable_multilingual_ocr=True):
+    """轉換單個PDF檔案為Markdown，支援多重OCR"""
     try:
         # 驗證PDF檔案
         is_valid, validation_msg = validate_pdf_file(pdf_path)
@@ -55,14 +30,11 @@ def convert_pdf_to_markdown(pdf_path, output_dir, image_output_dir, extractor, e
         pdf_name = pdf_path.stem
         output_md_path = output_dir / f"{pdf_name}.md"
         print(f"🔄 正在轉換: {pdf_path.name}")
-        print(f"   📐 數學公式處理: {'啟用' if enable_math_processing else '停用'}")
         print(f"   🌐 多語言OCR: {'啟用' if enable_multilingual_ocr else '停用'}")
         start_time = time.time()
         try:
             with MarkDownWriter(output_md_path, image_output_dir, encoding) as md:
                 for block in extractor.extract(str(pdf_path)):
-                    if enable_math_processing and hasattr(block, 'text'):
-                        block.text = process_math_formulas(block.text)
                     md.write(block)
         except ModuleNotFoundError as module_error:
             if "struct_eqtable" in str(module_error):
@@ -112,7 +84,7 @@ def validate_pdf_file(pdf_path):
     except Exception as e:
         return False, f"檔案驗證失敗: {str(e)}"
 
-def batch_convert_all_pdfs(root_dir, output_base_dir, image_output_dir, model_cache_path, device, encoding, enable_math_processing, enable_multilingual_ocr, extract_table_format):
+def batch_convert_all_pdfs(root_dir, output_base_dir, image_output_dir, model_cache_path, device, encoding, enable_multilingual_ocr, extract_table_format):
     """批次轉換所有PDF檔案，單線程處理"""
     pdf_files = list(Path(root_dir).rglob("*.pdf"))
     print(f"\n🔍 共找到 {len(pdf_files)} 個 PDF 檔案於 {root_dir}")
@@ -140,7 +112,6 @@ def batch_convert_all_pdfs(root_dir, output_base_dir, image_output_dir, model_ca
             img_dir,
             extractor,
             encoding=encoding,
-            enable_math_processing=enable_math_processing,
             enable_multilingual_ocr=enable_multilingual_ocr
         )
         
@@ -158,7 +129,6 @@ def main():
     model_cache_path = Path("model")
     device = "cuda"  # 或 "cpu"
     encoding = "utf-8"
-    enable_math_processing = True
     enable_multilingual_ocr = True
     extract_table_format = ExtractedTableFormat.MARKDOWN
     
@@ -170,7 +140,6 @@ def main():
         model_cache_path,
         device,
         encoding,
-        enable_math_processing,
         enable_multilingual_ocr,
         extract_table_format
     )
