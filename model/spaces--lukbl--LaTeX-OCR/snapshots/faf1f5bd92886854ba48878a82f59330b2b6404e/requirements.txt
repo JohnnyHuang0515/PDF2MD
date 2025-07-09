@@ -1,0 +1,2 @@
+altair<5
+pix2tex[api]

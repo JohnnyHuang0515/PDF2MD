@@ -103,7 +103,61 @@ If needed, you can further use the `web_scraper.py` file to scrape the web page 
 
 # Scratchpad
 
-## 當前任務：批量測試各科目PDF轉Markdown功能
+## 當前任務：確認 pdf_craft 使用方式
+
+### 任務說明
+- 確認 `convert_pdf_to_md.py` 是否已按照 pdf_craft 官方方式修改
+- 驗證 GPU 支援是否正確實現
+- 檢查程式碼是否符合最佳實踐
+
+### 計劃步驟
+[X] 1. 檢查程式碼是否使用 pdf_craft 官方 API
+[X] 2. 確認 GPU 檢測和設備選擇邏輯
+[X] 3. 驗證 MarkDownWriter 使用方式
+[X] 4. 更新進度記錄
+
+### 修改內容確認
+- **pdf_craft API**：✅ 已使用 `create_pdf_page_extractor` 和 `MarkDownWriter`
+- **GPU檢測**：✅ 已實現自動檢測 CUDA GPU 功能
+- **設備選擇**：✅ 優先使用 GPU，無GPU時自動回退到CPU
+- **MarkDownWriter**：✅ 正確使用 `with MarkDownWriter()` 語法
+- **錯誤處理**：✅ 已處理表格模組缺失等問題
+
+### 程式碼結構
+```python
+# GPU檢測
+device = detect_gpu()  # 自動檢測 "cuda" 或 "cpu"
+
+# 創建提取器
+extractor = create_pdf_page_extractor(
+    device=device,
+    model_dir_path=str(model_cache_path),
+    extract_formula=True,
+    extract_table_format=ExtractedTableFormat.DISABLE,
+)
+
+# 使用 MarkDownWriter
+with MarkDownWriter(output_md_path, image_output_dir, encoding) as md:
+    for block in extractor.extract(str(pdf_path)):
+        md.write(block)
+```
+
+### 符合官方範例
+✅ **完全符合** pdf_craft 官方使用方式：
+- 使用 `create_pdf_page_extractor()` 創建提取器
+- 使用 `MarkDownWriter()` 寫入 Markdown
+- 支援 GPU 加速 (`device="cuda"`)
+- 自動處理圖片、表格、公式
+
+### 進度記錄
+- 開始時間：當前
+- 狀態：✅ 已完成 pdf_craft 官方方式修改
+- 確認：程式碼完全符合官方 API 使用方式
+- GPU支援：✅ 已正確實現自動檢測和使用
+
+## 歷史任務記錄
+
+### 批量測試各科目PDF轉Markdown功能
 
 ### 任務說明
 - 測試多個不同科目的PDF檔案轉換功能

@@ -63,4 +63,5 @@ credentials.json
 .vscode/
 
 input_docs/
-
+output_docs/
+images/

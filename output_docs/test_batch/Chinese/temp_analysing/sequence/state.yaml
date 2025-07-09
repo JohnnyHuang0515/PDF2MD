@@ -1,9 +1,0 @@
-created_at: '2025-07-08 08:19:21'
-payload:
-  completed_ranges: []
-  max_paragraph_tokens: 512
-  max_paragraphs: 8
-  max_request_data_tokens: 4096
-  phase: completed
-updated_at: '2025-07-08 08:19:21'
-version: 1.0.0
