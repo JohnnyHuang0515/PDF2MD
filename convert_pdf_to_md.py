@@ -1,7 +1,11 @@
 import os
 import sys
 from pathlib import Path
+<<<<<<< HEAD
 from pdf_craft import create_pdf_page_extractor, MarkDownWriter, ExtractedTableFormat
+=======
+from pdf_craft import create_pdf_page_extractor, MarkDownWriter, ExtractedTableFormat, analyse, CorrectionMode
+>>>>>>> c5fd878ef717c3e7aee6fd715ea2cfcec3472816
 import time
 import re
 import multiprocessing as mp
@@ -14,6 +18,7 @@ import gc
 import traceback
 import logging
 
+<<<<<<< HEAD
 # 設定日誌
 logging.basicConfig(
     level=logging.INFO,
@@ -98,6 +103,8 @@ def validate_pdf_file(pdf_path):
     except Exception as e:
         return False, f"檔案驗證失敗: {str(e)}"
 
+=======
+>>>>>>> c5fd878ef717c3e7aee6fd715ea2cfcec3472816
 def process_math_formulas(text):
     """處理數學公式，轉換為LaTeX格式"""
     math_patterns = [
@@ -123,10 +130,16 @@ def process_math_formulas(text):
         processed_text = re.sub(pattern, replacement, processed_text)
     return processed_text
 
+<<<<<<< HEAD
 def convert_single_pdf_worker(args):
     """單個PDF轉換工作函數（用於多進程）"""
     pdf_path, output_dir, image_output_dir, device, model_cache_path, encoding, enable_math_processing, enable_multilingual_ocr, extract_table_format, worker_id = args
     
+=======
+def convert_pdf_to_markdown(pdf_path, output_dir, image_output_dir, extractor, encoding="utf-8", 
+                          enable_math_processing=True, enable_multilingual_ocr=True):
+    """轉換單個PDF檔案為Markdown，支援多重OCR和數學公式處理"""
+>>>>>>> c5fd878ef717c3e7aee6fd715ea2cfcec3472816
     try:
         # 驗證PDF檔案
         is_valid, validation_msg = validate_pdf_file(pdf_path)
@@ -152,6 +165,7 @@ def convert_single_pdf_worker(args):
         pdf_name = pdf_path.stem
         output_md_path = output_dir / f"{pdf_name}.md"
         
+<<<<<<< HEAD
         start_time = time.time()
         
         try:
@@ -179,6 +193,21 @@ def convert_single_pdf_worker(args):
             
         elapsed_time = time.time() - start_time
         return True, f"工作進程 {worker_id}: 完成轉換 {pdf_name} (耗時: {elapsed_time:.2f}秒)"
+=======
+        print(f"🔄 正在轉換: {pdf_path.name}")
+        print(f"   📐 數學公式處理: {'啟用' if enable_math_processing else '停用'}")
+        print(f"   🌐 多語言OCR: {'啟用' if enable_multilingual_ocr else '停用'}")
+        start_time = time.time()
+        
+        # 直接轉換PDF為Markdown
+        with MarkDownWriter(output_md_path, image_output_dir, encoding) as md:
+            for block in extractor.extract(str(pdf_path)):
+                if enable_math_processing and hasattr(block, 'text'):
+                    block.text = process_math_formulas(block.text)
+                
+                # 寫入區塊
+                md.write(block)
+>>>>>>> c5fd878ef717c3e7aee6fd715ea2cfcec3472816
         
     except Exception as e:
         error_details = traceback.format_exc()
@@ -250,6 +279,7 @@ def convert_pdf_to_markdown(pdf_path, output_dir, image_output_dir, extractor, e
         logging.error(f"轉換失敗: {pdf_path.name}\n錯誤詳情: {error_details}")
         return False, None
 
+<<<<<<< HEAD
 def batch_convert_parallel(root_dir, output_base_dir, image_output_dir, model_cache_path, device, encoding, enable_math_processing, enable_multilingual_ocr, extract_table_format, max_workers=None):
     """並行批次轉換PDF檔案"""
     excluded_subjects = {"Chinese", "English"}
@@ -257,6 +287,12 @@ def batch_convert_parallel(root_dir, output_base_dir, image_output_dir, model_ca
     failed_files_file = output_base_dir / "failed_files.json"
     processed_files = set()
     failed_files = []
+=======
+def process_subject(subject, base_input_dir, output_base_dir, image_output_dir, model_cache_path, 
+                   device, encoding, enable_math_processing, enable_multilingual_ocr, extract_table_format):
+    """處理單個科目的所有PDF檔案"""
+    print(f"\n{'='*20} 處理 {subject} 科目 {'='*20}")
+>>>>>>> c5fd878ef717c3e7aee6fd715ea2cfcec3472816
     
     if progress_file.exists():
         try:
@@ -275,6 +311,7 @@ def batch_convert_parallel(root_dir, output_base_dir, image_output_dir, model_ca
     print(f"📄 找到 {len(all_pdfs)} 個PDF檔案")
     print(f"🚫 排除科目: {', '.join(excluded_subjects)}")
     
+<<<<<<< HEAD
     pdfs_to_process = []
     for pdf_path in all_pdfs:
         path_parts = pdf_path.parts
@@ -288,6 +325,38 @@ def batch_convert_parallel(root_dir, output_base_dir, image_output_dir, model_ca
                     print(f"⏭️  跳過已處理的檔案: {pdf_path.name}")
             else:
                 print(f"⏭️  跳過 {subject_name} 科目檔案: {pdf_path.name}")
+=======
+    # 初始化PDF解析器（每個進程獨立）
+    extractor = create_pdf_page_extractor(
+        device=device,
+        model_dir_path=str(model_cache_path),
+        extract_formula=True,
+        extract_table_format=extract_table_format,
+    )
+    
+    if not extractor:
+        print(f"❌ {subject} PDF解析器初始化失敗")
+        return subject, 0, len(subject_pdfs)
+    
+    subject_successful = 0
+    subject_failed = 0
+    
+    for i, pdf_path in enumerate(subject_pdfs, 1):
+        print(f"\n[{i}/{len(subject_pdfs)}] 處理 {subject} 檔案...")
+        
+        success, output_path = convert_pdf_to_markdown(
+            pdf_path, 
+            subject_output_dir, 
+            subject_image_dir, 
+            extractor, 
+            encoding,
+            enable_math_processing=enable_math_processing,
+            enable_multilingual_ocr=enable_multilingual_ocr
+        )
+        
+        if success:
+            subject_successful += 1
+>>>>>>> c5fd878ef717c3e7aee6fd715ea2cfcec3472816
         else:
             print(f"⚠️  跳過路徑結構不正確的檔案: {pdf_path}")
     
@@ -296,6 +365,7 @@ def batch_convert_parallel(root_dir, output_base_dir, image_output_dir, model_ca
     if max_workers is None:
         max_workers = get_optimal_workers(device_type, gpu_count, gpu_memory)
     
+<<<<<<< HEAD
     print(f"✅ 將處理 {len(pdfs_to_process)} 個PDF檔案")
     if len(pdfs_to_process) == 0:
         print("🎉 所有檔案都已處理完成！")
@@ -323,6 +393,40 @@ def batch_convert_parallel(root_dir, output_base_dir, image_output_dir, model_ca
             enable_multilingual_ocr,
             extract_table_format,
             i + 1  # worker_id
+=======
+    return subject, subject_successful, subject_failed
+
+def batch_convert_all_pdfs(root_dir, output_base_dir, image_output_dir, model_cache_path, device, encoding, enable_math_processing, enable_multilingual_ocr, extract_table_format):
+    """批次轉換所有PDF檔案，單線程處理"""
+    pdf_files = list(Path(root_dir).rglob("*.pdf"))
+    print(f"\n🔍 共找到 {len(pdf_files)} 個 PDF 檔案於 {root_dir}")
+    
+    # 初始化PDF解析器（共用）
+    extractor = create_pdf_page_extractor(
+        device=device,
+        model_dir_path=str(model_cache_path),
+        extract_formula=True,
+        extract_table_format=extract_table_format,
+    )
+    
+    success_count = 0
+    fail_count = 0
+    
+    for i, pdf_path in enumerate(pdf_files, 1):
+        # 依據 PDF 所在目錄建立對應輸出資料夾
+        rel_dir = pdf_path.parent.relative_to(root_dir)
+        out_dir = output_base_dir / rel_dir
+        img_dir = image_output_dir / rel_dir
+        print(f"\n[{i}/{len(pdf_files)}] 處理 {pdf_path}")
+        success, output_path = convert_pdf_to_markdown(
+            pdf_path,
+            out_dir,
+            img_dir,
+            extractor,
+            encoding=encoding,
+            enable_math_processing=enable_math_processing,
+            enable_multilingual_ocr=enable_multilingual_ocr
+>>>>>>> c5fd878ef717c3e7aee6fd715ea2cfcec3472816
         )
         tasks.append(task_args)
     
@@ -446,6 +550,7 @@ def batch_convert_exclude_chinese_english(root_dir, output_base_dir, image_outpu
             else:
                 print(f"⏭️  跳過 {subject_name} 科目檔案: {pdf_path.name}")
         else:
+<<<<<<< HEAD
             print(f"⚠️  跳過路徑結構不正確的檔案: {pdf_path}")
     print(f"✅ 將處理 {len(pdfs_to_process)} 個PDF檔案")
     if len(pdfs_to_process) == 0:
@@ -544,11 +649,22 @@ def main():
     base_input_dir = Path("input_docs")
     output_base_dir = Path("output_docs/test_batch_all_exclude_chinese_english")
     image_output_dir = Path("images/test_batch_all_exclude_chinese_english")
+=======
+            fail_count += 1
+    print(f"\n📊 批次轉換完成：成功 {success_count}，失敗 {fail_count}")
+
+def main():
+    # === 設定路徑 ===
+    base_input_dir = Path("input_docs")  # 處理 input_docs 底下所有檔案
+    output_base_dir = Path("output_docs")
+    image_output_dir = Path("images")
+>>>>>>> c5fd878ef717c3e7aee6fd715ea2cfcec3472816
     model_cache_path = Path("model")
     device, gpu_count, gpu_memory = detect_gpu()
     encoding = "utf-8"
     enable_math_processing = True
     enable_multilingual_ocr = True
+<<<<<<< HEAD
     extract_table_format = ExtractedTableFormat.DISABLE
     
     # 多工處理設定
@@ -598,6 +714,21 @@ def main():
         return 1
     print(f"🎉 程式執行完成")
     return 0
+=======
+    extract_table_format = ExtractedTableFormat.MARKDOWN
+    # === 單線程批次處理所有 PDF ===
+    batch_convert_all_pdfs(
+        base_input_dir,
+        output_base_dir,
+        image_output_dir,
+        model_cache_path,
+        device,
+        encoding,
+        enable_math_processing,
+        enable_multilingual_ocr,
+        extract_table_format
+    )
+>>>>>>> c5fd878ef717c3e7aee6fd715ea2cfcec3472816
 
 if __name__ == "__main__":
     main()
